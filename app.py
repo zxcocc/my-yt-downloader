@@ -1,42 +1,23 @@
 import streamlit as st
-import requests
 
-st.title("YouTube Downloader")
-url = st.text_input("Masukkan link YouTube:")
+st.set_page_config(page_title="YT Downloader", page_icon="⬇️")
 
-if st.button("Download Sekarang"):
-    if url:
-        try:
-            st.write("Menghubungkan ke server...")
-            
-            # Format payload yang lebih standar untuk Cobalt API
-            payload = {
-                "url": url,
-                "vCodec": "h264",
-                "vQuality": "720"
-            }
-            headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            }
-            
-            # Kita arahkan ke endpoint yang benar
-            response = requests.post("https://api.cobalt.tools/api/json", json=payload, headers=headers)
-            
-            if response.status_code == 200:
-                data = response.json()
-                # Cobalt seringkali mengembalikan 'url' langsung
-                if "url" in data:
-                    st.success("Berhasil! Video siap.")
-                    st.link_button("Klik untuk Simpan Video", data["url"])
-                else:
-                    st.error(f"API berhasil diakses, tapi tidak ditemukan link unduhan: {data}")
-            else:
-                # Menampilkan pesan error detail dari API
-                st.error(f"API menolak permintaan (Status 400). Pastikan link benar. Detail: {response.text}")
-                
-        except Exception as e:
-            st.error(f"Terjadi kesalahan: {e}")
+st.title("⬇️ YouTube Downloader")
+st.write("Masukkan link video YouTube di bawah ini:")
+
+url = st.text_input("Contoh: https://www.youtube.com/watch?v=...")
+
+if st.button("Dapatkan Link Download"):
+    if url and ("youtube.com" in url or "youtu.be" in url):
+        # Mengambil ID Video
+        video_id = url.split("v=")[-1] if "v=" in url else url.split("/")[-1]
+        
+        # Link ke layanan pengunduh pihak ketiga yang stabil
+        download_url = f"https://snapsave.app/id/youtube/{video_id}"
+        
+        st.success("Tautan berhasil dibuat!")
+        st.link_button("Klik di sini untuk Download", download_url)
+        st.info("Anda akan diarahkan ke halaman unduhan eksternal yang stabil.")
     else:
-        st.warning("Masukkan link YouTube dulu!")
+        st.error("Masukkan link YouTube yang valid.")
         
