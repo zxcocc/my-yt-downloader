@@ -1,16 +1,15 @@
 import streamlit as st
 import requests
 
-st.title("YouTube Downloader (Stable API)")
+st.title("YouTube Downloader")
 url = st.text_input("Masukkan link YouTube:")
 
 if st.button("Download Sekarang"):
     if url:
         try:
-            st.write("Menghubungkan ke server pengunduh...")
+            st.write("Menghubungkan ke server...")
             
-            # Payload untuk API Cobalt
-            # Kita menggunakan API publik cobalt.tools
+            # Format payload yang lebih standar untuk Cobalt API
             payload = {
                 "url": url,
                 "vCodec": "h264",
@@ -21,24 +20,23 @@ if st.button("Download Sekarang"):
                 "Content-Type": "application/json"
             }
             
+            # Kita arahkan ke endpoint yang benar
             response = requests.post("https://api.cobalt.tools/api/json", json=payload, headers=headers)
-            data = response.json()
             
-            # Jika respon dari API adalah 'redirect' atau 'url'
             if response.status_code == 200:
+                data = response.json()
+                # Cobalt seringkali mengembalikan 'url' langsung
                 if "url" in data:
                     st.success("Berhasil! Video siap.")
                     st.link_button("Klik untuk Simpan Video", data["url"])
-                elif "status" in data and data["status"] == "redirect":
-                    st.success("Video siap.")
-                    st.link_button("Klik untuk Simpan Video", data["url"])
                 else:
-                    st.error(f"API merespon tapi tidak menemukan link: {data}")
+                    st.error(f"API berhasil diakses, tapi tidak ditemukan link unduhan: {data}")
             else:
-                st.error(f"Gagal terhubung ke API. Status: {response.status_code}")
+                # Menampilkan pesan error detail dari API
+                st.error(f"API menolak permintaan (Status 400). Pastikan link benar. Detail: {response.text}")
                 
         except Exception as e:
-            st.error(f"Terjadi kesalahan teknis: {e}")
+            st.error(f"Terjadi kesalahan: {e}")
     else:
         st.warning("Masukkan link YouTube dulu!")
         
